@@ -24,20 +24,15 @@ function toggleLanguage() {
      const langToggle_mobile = document.getElementById("languageToggle-mobile");
     const langLabel = document.getElementById("lang-label");
       const langLabel_mobile = document.getElementById("lang-label-mobile");
-     const isHindi = langToggle.checked || langToggle_mobile.checked;
-    langToggle.checked = isHindi;
-    langToggle_mobile.checked = isHindi;
+    const lang = langToggle.checked ? "hi" : "en";
+ const lang_mobile = langToggle_mobile.checked ? "hi" : "en";
 
-    // Update labels
-    langLabel.textContent = isHindi ? "हिंदी" : "EN";
-    langLabel_mobile.textContent = isHindi ? "हिंदी" : "EN";
-
-    // Load translations
-    loadLanguage(isHindi ? "hi" : "en");
-}
-    
    
-
+     langLabel.textContent = langToggle.checked ? "हिंदी" : "EN";
+     langLabel_mobile.textContent = langToggle_mobile.checked ? "हिंदी" : "EN";
+    loadLanguage(lang);
+   
+}
 
 // Page load pe default English
 document.addEventListener("DOMContentLoaded", () => loadLanguage("en"));
