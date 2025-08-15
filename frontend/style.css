@@ -1,0 +1,58 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.hero-gradient {
+    background: linear-gradient(135deg, #FF6B6B, #FFD166);
+}
+
+.restaurant-card:hover,
+.grocery-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.food-item:hover,
+.grocery-item:hover {
+    transform: translateY(-3px);
+}
+
+.loading-spinner {
+    border-top-color: #FF6B6B;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.category-tab.active {
+    background-color: #FF6B6B;
+    color: white;
+}
+
+.main-tab.active {
+    color: #FF6B6B;
+    border-bottom: 3px solid #FF6B6B;
+}

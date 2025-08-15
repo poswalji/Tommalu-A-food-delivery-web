@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodDelivery - Order Food & Groceries Online</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .star {
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+    
+        .star:hover,
+        .star.active {
+            color: #ff6347;
+        }
+    
+        .order-card {
+            transition: all 0.3s ease;
+        }
+    
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 99, 71, 0.2);
+        }
+    
+        .tomato-gradient {
+            background: linear-gradient(135deg, #ff6347 0%, #ff4500 100%);
+        }
+    
+        .tomato-light-gradient {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+        }
+    </style>
+</head>
+
+<body>
+<header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+
+        <!-- Left: Logo + Hamburger in mobile -->
+        <div class="flex items-center space-x-4">
+            <!-- Hamburger (mobile only) -->
+            <button id="mobile-menu-open" class="md:hidden p-2 text-gray-700 hover:text-red-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <!-- Logo -->
+            <a href="#" id="logo" class="text-2xl font-bold text-red-500">Tommalu</a>
+            <!-- Navigation desktop -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="#" id="home-link" class="text-red-500 font-medium border-b-2 border-red-500">Home</a>
+            </nav>
+        </div>
+
+        <!-- Center: Search bar desktop -->
+        <form class="relative flex-1 max-w-md mx-4 hidden sm:block">
+            <input type="text" id="searchInput" data-key="search_placeholder"
+                placeholder="Search for food, groceries..."
+                class="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+            <!-- Search icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <!-- Mic button -->
+            <button type="button" id="micBtn"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-red-500 transition-all">
+                <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor"
+                    viewBox="0 0 24 24">
+                    <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" />
+                    <path d="M19 11a7 7 0 0 1-14 0" />
+                    <path d="M12 19v4m-4 0h8" />
+                </svg>
+            </button>
+            <span id="micPulse"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-red-500 animate-ping hidden"></span>
+        </form>
+
+        <!-- Right: Location, Lang toggle, Cart, Sign In -->
+        <div class="flex items-center space-x-4">
+            <div class="relative ">
+                <button id="location-btn"
+                    class="flex items-center gap-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-full px-3 py-1 hover:border-red-500">
+                    Deliver in <span id="selected-location" class="text-red-500 ml-1">Achrol</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+            </div>
+            <div class="flex items-center space-x-2 hidden md:flex">
+                <span id="lang-label" class="text-sm font-medium text-gray-700">EN</span>
+                <label class="relative inline-block w-12 h-6">
+                    <input type="checkbox" id="languageToggle" class="opacity-0 w-0 h-0 peer"
+                        onchange="toggleLanguage()">
+                    <span class="absolute inset-0 bg-gray-300 rounded-full transition duration-300 
+            before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white 
+            before:rounded-full before:transition-all before:duration-300 
+            peer-checked:bg-[#e11d48] peer-checked:before:translate-x-6"></span>
+                </label>
+            </div>
+            <button onclick="toggleOrders()" class="text-gray-700 hover:text-red-500 font-medium transition-colors hidden sm:block">My
+                Orders</button>
+            
+            <!-- Cart -->
+            <button id="cart-button" class="relative p-2 text-gray-700 hover:text-red-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 
+              0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span id="cart-count"
+                    class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+            </button>
+            <!-- Sign In -->
+            <button id="user-button" data-key="login"
+                class="hidden md:block bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-300">
+                Sign In
+            </button>
+        </div>
+    </div>
+</header>
+    <!-- Mobile menu -->
+<!-- Mobile Menu Overlay -->
+<div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-40 hidden z-40"></div>
+
+<!-- Mobile Menu Drawer -->
+<div id="mobile-menu"
+    class="fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white z-50 p-4 transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+    <!-- Close button -->
+    <button id="mobile-menu-close" class="mb-4 text-gray-700 hover:text-red-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+
+    <!-- Menu links -->
+    <nav class="flex flex-col space-y-4 mb-6">
+        <a href="#" id="food-tab" class="text-gray-700 hover:text-red-500 font-medium">Food</a>
+        <a href="#" id="grocery-tab" class="text-gray-700 hover:text-red-500 font-medium">Grocery</a>
+    </nav>
+
+    <!-- My Orders Section -->
+    <button onclick="toggleOrders()" class="text-gray-700 hover:text-red-500 font-medium transition-colors mb-6">My
+        Orders</button>
+
+    <!-- Language Toggle -->
+    <div class="flex items-center space-x-2 ">
+        <span id="lang-label-mobile" class="text-sm font-medium text-gray-700">EN</span>
+        <label class="relative inline-block w-12 h-6">
+            <input type="checkbox" id="languageToggle-mobile" class="opacity-0 w-0 h-0 peer" onchange="toggleLanguage()">
+            <span class="absolute inset-0 bg-gray-300 rounded-full transition duration-300 
+                before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white 
+                before:rounded-full before:transition-all before:duration-300 
+                peer-checked:bg-[#e11d48] peer-checked:before:translate-x-6"></span>
+        </label>
+    </div>
+
+    <!-- Sign In Button -->
+    <button id="user-button-mobile" data-key="login"
+        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-300">
+        Sign In
+    </button>
+</div>
+
+
+<div class="bg-white shadow-sm py-3 block md:hidden ">
+    <div class="container mx-auto px-4">
+        <form class="relative w-full">
+            <input type="text" id="searchInput" placeholder="Search for food, groceries..."
+                class="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+            <!-- Search icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <!-- Mic button -->
+            <button type="button" id="micBtn"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-red-500 transition-all">
+                <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor"
+                    viewBox="0 0 24 24">
+                    <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z" />
+                    <path d="M19 11a7 7 0 0 1-14 0" />
+                    <path d="M12 19v4m-4 0h8" />
+                </svg>
+            </button>
+            <span id="micPulse"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 border-red-500 animate-ping hidden"></span>
+
+                
+        </form>
+    </div>
+</div>
+<!-- Mobile Menu -->
+
+    <!-- Main Navigation Tabs -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex">
+                <button class="main-tab active py-4 px-6 font-medium text-lg transition duration-300 hidden"
+                    id="food-tab">Food</button>
+                <button class="main-tab py-4 px-6 font-medium text-lg text-gray-500 transition duration-300"
+                    id="grocery-tab">Grocery</button>
+            </div>
+        </div>
+    </div>
+    <div id="location-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="bg-white rounded-xl max-w-sm mx-auto mt-24 p-4">
+            <h2 class="text-lg font-bold mb-4">Select Delivery Location</h2>
+            <ul class="space-y-2">
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Achrol')">Achrol</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Talamod')">Talamod</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Labana')">Labana</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Nims Zone')">Nims Zone</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Amity Zone')">Amity Zone</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Talamod Zone')">Talamod Zone</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Page Content -->
+        <div id="home-page" class="block">
+            <!-- Hero Section -->
+            <section class="hero-gradient text-white py-16">
+                <div class="container mx-auto px-4">
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/2 mb-8 md:mb-0">
+                            <h1 data-key="headline" class="text-4xl md:text-5xl font-bold mb-4">Food & Groceries Delivered To Your Door</h1>
+                            <p data-key="subheadline" class="text-lg mb-6">Order from your favorite restaurants and grocery stores for delivery
+                                in minutes.</p>
+                            <div class="flex flex-wrap gap-3">
+                                <button data-key="explore_food"
+                                    class="bg-white text-red-500 hover:bg-gray-100 hover:text-red-500 px-6 py-3 rounded-full font-medium transition duration-300"
+                                    id="explore-food-button">Explore Food</button>
+                                <button data-key="shop_groceries"
+                                    class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-red-500 px-6 py-3 rounded-full font-medium transition duration-300"
+                                    id="explore-grocery-button">Shop Groceries</button>
+                            </div>
+                        </div>
+                        <div class="md:w-1/2 flex justify-center">
+                            <div class="relative">
+                                <svg class="w-64 h-64 md:w-80 md:h-80" viewBox="0 0 200 200"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="100" cy="100" r="80" fill="white" fill-opacity="0.2" />
+                                    <g transform="translate(60, 40)">
+                                        <!-- Plate -->
+                                        <circle cx="40" cy="60" r="35" fill="white" />
+                                        <!-- Food items -->
+                                        <rect x="25" y="45" width="30" height="10" rx="2" fill="#FF6B6B" />
+                                        <circle cx="30" cy="65" r="8" fill="#FFD166" />
+                                        <circle cx="50" cy="65" r="8" fill="#06D6A0" />
+                                        <path d="M25,75 Q40,85 55,75" stroke="#118AB2" stroke-width="3" fill="none" />
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Food Section -->
+            <div id="food-section" class="block">
+                <!-- Category Tabs -->
+                <section class="bg-white py-6 border-b">
+                    <div class="container mx-auto px-4">
+                        <div class="flex overflow-x-auto space-x-4 pb-2">
+                            <button
+                                class="category-tab active whitespace-nowrap px-6 py-2 rounded-full text-sm font-medium transition duration-300"
+                                data-category="all">All</button>
+                            <button
+                                class="category-tab whitespace-nowrap px-6 py-2 bg-gray-100 rounded-full text-sm font-medium transition duration-300"
+                                data-category="fast-food">Fast Food</button>
+                            <button
+                                class="category-tab whitespace-nowrap px-6 py-2 bg-gray-100 rounded-full text-sm font-medium transition duration-300"
+                                data-category="pizza">Pizza</button>
+                            <button
+                                class="category-tab whitespace-nowrap px-6 py-2 bg-gray-100 rounded-full text-sm font-medium transition duration-300"
+                                data-category="healthy">Healthy</button>
+                            <button
+                                class="category-tab whitespace-nowrap px-6 py-2 bg-gray-100 rounded-full text-sm font-medium transition duration-300"
+                                data-category="desserts">Desserts</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Popular Restaurants Section -->
+                <section class="py-12 bg-white">
+                    <div class="container mx-auto px-4">
+                        <h2 data-key="popular_restro" class="text-2xl font-bold mb-6">Popular Restaurants</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="restaurants-container">
+                            <!-- Restaurant cards will be dynamically added here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Grocery Section -->
+            <div id="grocery-section" class="hidden">
+                <!-- Grocery Category Tabs -->
+                <section class="bg-white py-6 border-b">
+                    <div class="container mx-auto px-4">
+                        <div class="flex overflow-x-auto space-x-4 pb-2">
+                            <button
+                                class="category-tab active whitespace-nowrap px-6 py-2 rounded-full text-sm font-medium transition duration-300"
+                                data-category="all">All</button>
+                            <button
+                                class="category-tab whitespace-nowrap px-6 py-2 bg-gray-100 rounded-full text-sm font-medium transition duration-300"
+                                data-category="supermarket">Supermarket</button>
+                            <button
+                                class="category-tab whitespace-nowrap px-6 py-2 bg-gray-100 rounded-full text-sm font-medium transition duration-300"
+                                data-category="organic">Organic</button>
+                            <button
+                                class="category-tab whitespace-nowrap px-6 py-2 bg-gray-100 rounded-full text-sm font-medium transition duration-300"
+                                data-category="convenience">Convenience</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Popular Grocery Stores Section -->
+                <section class="py-12 bg-white">
+                    <div class="container mx-auto px-4">
+                        <h2 class="text-2xl font-bold mb-6">Grocery Stores</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="grocery-stores-container">
+                            <!-- Grocery store cards will be dynamically added here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- How It Works Section -->
+            <section class="py-12 bg-gray-50">
+                <div class="container mx-auto px-4">
+                    <h2 data-key="how_it_works" class="text-2xl font-bold text-center mb-10">How It Works</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm text-center">
+                            <div
+                                class="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <h3 data-key="choose_store_title" class="text-lg font-semibold mb-2">Choose Store</h3>
+                            <p data-key="choose_store_desc"  class="text-gray-600">Browse through our selection of restaurants and grocery stores.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm text-center">
+                            <div
+                                class="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <h3 data-key="select_items_title" class="text-lg font-semibold mb-2">Select Your Items</h3>
+                            <p data-key="select_items_desc" class="text-gray-600">Choose from a variety of meals or grocery products and add them to
+                                your cart.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm text-center">
+                            <div
+                                class="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h3 data-key="fast_delivery_title" class="text-lg font-semibold mb-2">Fast Delivery</h3>
+                            <p data-key="fast_delivery_desc" class="text-gray-600">Receive your food or groceries at your doorstep in minutes. Enjoy!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Restaurant Detail Page -->
+        <div id="restaurant-detail-page" class="hidden">
+            <div class="container mx-auto px-4 py-8">
+                <button id="back-to-home" class="flex items-center text-gray-600 hover:text-red-500 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Back to Home
+                </button>
+                <div id="restaurant-details" class="mb-8">
+                    <!-- Restaurant details will be dynamically added here -->
+                </div>
+                <h2 class="text-2xl font-bold mb-4">Menu</h2>
+                <div id="menu-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Menu items will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Grocery Store Detail Page -->
+        <div id="grocery-detail-page" class="hidden">
+            <div class="container mx-auto px-4 py-8">
+                <button id="back-to-home-grocery" class="flex items-center text-gray-600 hover:text-red-500 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Back to Home
+                </button>
+                <div id="grocery-store-details" class="mb-8">
+                    <!-- Grocery store details will be dynamically added here -->
+                </div>
+
+                <!-- Category navigation -->
+                <div class="mb-6 overflow-x-auto">
+                    <div class="flex space-x-4 pb-2" id="grocery-categories">
+                        <!-- Categories will be added dynamically -->
+                    </div>
+                </div>
+
+                <div id="grocery-items-container">
+                    <!-- Grocery items will be organized by category and dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-10">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">FoodDelivery</h3>
+                    <p class="text-gray-400 mb-4">The best food and grocery delivery service in town. Order your
+                        favorite meals and groceries.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm6.066 9.645c.183 4.04-2.83 8.544-8.164 8.544-1.622 0-3.131-.476-4.402-1.291 1.524.18 3.045-.244 4.252-1.189-1.256-.023-2.317-.854-2.684-1.995.451.086.895.061 1.298-.049-1.381-.278-2.335-1.522-2.304-2.853.388.215.83.344 1.301.359-1.279-.855-1.641-2.544-.889-3.835 1.416 1.738 3.533 2.881 5.92 3.001-.419-1.796.944-3.527 2.799-3.527.825 0 1.572.349 2.096.907.654-.128 1.27-.368 1.824-.697-.215.671-.67 1.233-1.263 1.589.581-.07 1.135-.224 1.649-.453-.384.578-.87 1.084-1.433 1.489z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Services</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Categories</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Restaurants</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Grocery</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Fast Food</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Healthy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Us</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>123 Main Street, Your City</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span>(123) 456-7890</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 mt-0.5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span>info@fooddelivery.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 FoodDelivery. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <div id="location-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center">
+        <div class="bg-white rounded-xl max-w-sm w-full p-4">
+            <h2 class="text-lg font-bold mb-4">Select Delivery Location</h2>
+            <ul class="space-y-2">
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Achrol')">Achrol</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Talamod')">Talamod</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Labana')">Labana</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Nims Zone')">Nims Zone</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Amity Zone')">Amity Zone</li>
+                <li class="cursor-pointer p-2 hover:bg-gray-100 hover:text-red-500" onclick="setLocation('Talamod Zone')">Talamod Zone</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="cart-overlay"></div>
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-lg transform transition-transform duration-300 translate-x-full"
+            id="cart-container">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2  data-key="cart_title" class="text-xl font-bold">Your Cart</h2>
+                <button id="close-cart" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto h-[calc(100%-180px)]" id="cart-items">
+                <!-- Cart items will be added here -->
+                <div class="text-center text-gray-500 py-8" id="empty-cart-message">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <p data-key="empty_cart">Your cart is empty</p>
+                    <p data-key="empty_cart_subtext" class="text-sm mt-2">Add items to get started</p>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 bg-white border-t p-4">
+                <div class="flex justify-between mb-4">
+                    <span data-key="subtotal"  class="font-medium">Subtotal</span>
+                    <span class="font-medium" id="cart-subtotal">$0.00</span>
+                </div>
+                <div class="flex justify-between mb-4">
+                    <span data-key="delivery_fee" class="text-sm text-gray-500">Delivery Fee</span>
+                    <span  class="text-sm text-gray-500">$2.99</span>
+                </div>
+                <div class="flex justify-between mb-4 font-bold">
+                    <span data-key="total">Total</span>
+                    <span id="cart-total">$0.00</span>
+                </div>
+                <button id="checkout-button" data-key="checkout"
+                    class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-medium transition duration-300">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="login-overlay"></div>
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 data-key="login_title" class="text-2xl font-bold">Sign In</h2>
+                <button id="close-login" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label data-key="email_label" for="email" class="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
+                    <input type="email" id="email" name="email"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+                <div class="mb-6">
+                    <label data-key="password_label" for="password" class="block text-gray-700 text-sm font-medium mb-2">Password</label>
+                    <input type="password" id="password" name="password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" name="remember"
+                            class="h-4 w-4 text-red-500 focus:ring-red-500 border-gray-300 rounded">
+                        <label data-key="remember_me" for="remember" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                    </div>
+                    <a  data-key="forgot_password" href="#" class="text-sm text-red-500 hover:text-red-600">Forgot password?</a>
+                </div>
+                <button type="submit" data-key="login_button"
+                    class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-medium transition duration-300">Sign
+                    In</button>
+                <div class="mt-4 text-center">
+                    <p data-key="no_account" class="text-sm text-gray-600">Don't have an account?</p>
+                    <a data-key="sign_up" href="#" id="show-register"
+                            class="text-red-500 hover:text-red-600 font-medium">Sign up</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="register-overlay"></div>
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2  data-key="register_title" class="text-2xl font-bold">Create Account</h2>
+                <button id="close-register" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="register-form">
+                <div class="mb-4">
+                    <label data-key="full_name_label" for="name" class="block text-gray-700 text-sm font-medium mb-2">Full Name</label>
+                    <input type="text" id="name" name="name"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+                <div class="mb-4">
+                    <label data-key="email_label" for="reg-email" class="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
+                    <input type="email" id="reg-email" name="email"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+                <div class="mb-4">
+                    <label data-key="password_label" for="reg-password" class="block text-gray-700 text-sm font-medium mb-2">Password</label>
+                    <input type="password" id="reg-password" name="password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+                <div class="mb-6">
+                    <label  data-key="confirm_password_label"for="confirm-password" class="block text-gray-700 text-sm font-medium mb-2">Confirm
+                        Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        required>
+                </div>
+                <button data-key="register_button" type="submit"
+                    class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-medium transition duration-300">Create
+                    Account</button>
+                <div  data-key="have_account" class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">Already have an account? <a href="#" id="show-login"
+                       data-key="sign_in"     class="text-red-500 hover:text-red-600 font-medium">Sign in</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80 hidden">
+        <div class="loading-spinner w-12 h-12 border-4 border-gray-200 rounded-full"></div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <span id="toast-message">Notification message</span>
+    </div>
+<!-- WhatsApp Order Button -->
+<div class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+    <a id="whatsapp-link" href="https://wa.me/919358992352" target="_blank"
+        class="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-green-500 rounded-full shadow-lg hover:bg-green-600 transition duration-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-8 sm:h-8 text-white" viewBox="0 0 24 24"
+            fill="currentColor">
+            <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+    </a>
+</div>
+<div id="ordersSection" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto"
+    onclick="closeOnOutsideClick(event)">
+    <div class="min-h-screen px-4 py-8">
+        <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl relative p-6 md:p-8"
+            onclick="event.stopPropagation()">
+            <!-- Close Button -->
+            <button onclick="toggleOrders()"
+                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10">
+                ×
+            </button>
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center pr-8">My Orders</h2>
+
+            <!-- Current Orders -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-semibold text-gray-700 mb-6 flex items-center">
+                    <span class="w-3 h-3 rounded-full mr-3" style="background-color: #ff6347;"></span>
+                    Current Orders
+                </h3>
+                <div class="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
+                    <!-- Active Order 1 -->
+                    <div class="order-card bg-white rounded-xl shadow-md p-4 sm:p-6 border-l-4"
+                        style="border-left-color: #ff6347;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800">Order #12345</h4>
+                                <p class="text-gray-600">Margherita Pizza, Garlic Bread</p>
+                            </div>
+                            <span class="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+                                style="background-color: #ffe8e8; color: #cc2e1f;">
+                                Preparing
+                            </span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Order Time:</span>
+                                <span class="font-medium">2:30 PM</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Estimated Delivery:</span>
+                                <span class="font-medium text-green-600">3:15 PM</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total:</span>
+                                <span class="font-bold">$24.99</span>
+                            </div>
+                        </div>
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="h-2 rounded-full" style="background-color: #ff6347; width: 60%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">Order is being prepared...</p>
+                    </div>
+
+                    <!-- Active Order 2 -->
+                    <div class="order-card bg-white rounded-xl shadow-md p-4 sm:p-6 border-l-4"
+                        style="border-left-color: #ff4500;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800">Order #12346</h4>
+                                <p class="text-gray-600">Chicken Burger, Fries, Coke</p>
+                            </div>
+                            <span class="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
+                                style="background-color: #fff0e6; color: #cc3300;">
+                                Out for Delivery
+                            </span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Order Time:</span>
+                                <span class="font-medium">1:45 PM</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Estimated Delivery:</span>
+                                <span class="font-medium text-green-600">2:45 PM</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total:</span>
+                                <span class="font-bold">$18.50</span>
+                            </div>
+                        </div>
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="h-2 rounded-full" style="background-color: #ff4500; width: 85%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">Your order is on the way!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Previous Orders -->
+            <div>
+                <h3 class="text-2xl font-semibold text-gray-700 mb-6 flex items-center">
+                    <span class="w-3 h-3 rounded-full mr-3" style="background-color: #228B22;"></span>
+                    Previous Orders
+                </h3>
+                <div class="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Delivered Order 1 -->
+                    <div class="order-card bg-white rounded-xl shadow-md p-4 sm:p-6 border-l-4"
+                        style="border-left-color: #228B22;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800">Order #12344</h4>
+                                <p class="text-gray-600">Pepperoni Pizza, Salad</p>
+                            </div>
+                            <span
+                                class="bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                                Delivered
+                            </span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Delivered:</span>
+                                <span class="font-medium">Yesterday, 7:30 PM</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total:</span>
+                                <span class="font-bold">$22.99</span>
+                            </div>
+                        </div>
+
+                        <!-- Rating Section -->
+                        <div id="rating-12344" class="border-t pt-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Rate your experience:</p>
+                            <div class="flex items-center space-x-1 mb-3">
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12344, 1)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12344, 2)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12344, 3)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12344, 4)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12344, 5)">★</span>
+                            </div>
+                            <button onclick="submitRating(12344)"
+                                class="w-full tomato-gradient text-white py-2 rounded-lg hover:opacity-90 transition-all text-sm">
+                                Submit Rating
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Delivered Order 2 (Already Rated) -->
+                    <div class="order-card bg-white rounded-xl shadow-md p-4 sm:p-6 border-l-4"
+                        style="border-left-color: #228B22;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800">Order #12343</h4>
+                                <p class="text-gray-600">Spaghetti Carbonara</p>
+                            </div>
+                            <span
+                                class="bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                                Delivered
+                            </span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Delivered:</span>
+                                <span class="font-medium">2 days ago, 6:45 PM</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total:</span>
+                                <span class="font-bold">$16.99</span>
+                            </div>
+                        </div>
+
+                        <!-- Already Rated -->
+                        <div class="border-t pt-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Your rating:</p>
+                            <div class="flex items-center space-x-1 mb-2">
+                                <span class="text-yellow-400 text-lg">★★★★★</span>
+                                <span class="text-sm text-gray-600 ml-2">(5/5)</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Thank you for your feedback!</p>
+                        </div>
+                    </div>
+
+                    <!-- Delivered Order 3 -->
+                    <div class="order-card bg-white rounded-xl shadow-md p-4 sm:p-6 border-l-4"
+                        style="border-left-color: #228B22;">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-800">Order #12342</h4>
+                                <p class="text-gray-600">Caesar Salad, Soup</p>
+                            </div>
+                            <span
+                                class="bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                                Delivered
+                            </span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Delivered:</span>
+                                <span class="font-medium">3 days ago, 1:20 PM</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Total:</span>
+                                <span class="font-bold">$14.50</span>
+                            </div>
+                        </div>
+
+                        <!-- Rating Section -->
+                        <div id="rating-12342" class="border-t pt-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Rate your experience:</p>
+                            <div class="flex items-center space-x-1 mb-3">
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12342, 1)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12342, 2)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12342, 3)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12342, 4)">★</span>
+                                <span class="star text-gray-300 text-xl" onclick="setRating(12342, 5)">★</span>
+                            </div>
+                            <button onclick="submitRating(12342)"
+                                class="w-full tomato-gradient text-white py-2 rounded-lg hover:opacity-90 transition-all text-sm">
+                                Submit Rating
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let selectedRatings = {};
+
+    function toggleOrders() {
+        const ordersSection = document.getElementById('ordersSection');
+
+        if (ordersSection.classList.contains('hidden')) {
+            ordersSection.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        } else {
+            ordersSection.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+    }
+
+    function setRating(orderId, rating) {
+        selectedRatings[orderId] = rating;
+        const ratingContainer = document.getElementById(`rating-${orderId}`);
+        const stars = ratingContainer.querySelectorAll('.star');
+
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+                star.classList.remove('text-gray-300');
+            } else {
+                star.classList.remove('active');
+                star.classList.add('text-gray-300');
+            }
+        });
+    }
+
+    function submitRating(orderId) {
+        const rating = selectedRatings[orderId];
+        if (!rating) {
+            alert('Please select a rating first!');
+            return;
+        }
+
+        const ratingContainer = document.getElementById(`rating-${orderId}`);
+        const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+
+        ratingContainer.innerHTML = `
+                <p class="text-sm font-medium text-gray-700 mb-2">Your rating:</p>
+                <div class="flex items-center space-x-1 mb-2">
+                    <span class="text-yellow-400 text-lg">${'★'.repeat(rating)}</span>
+                    <span class="text-sm text-gray-600 ml-2">(${rating}/5)</span>
+                </div>
+                <p class="text-xs text-gray-500">Thank you for your feedback!</p>
+            `;
+
+        // Show success message
+        const successMsg = document.createElement('div');
+        successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        successMsg.textContent = `Rating submitted successfully! (${rating} stars)`;
+        document.body.appendChild(successMsg);
+
+        setTimeout(() => {
+            successMsg.remove();
+        }, 3000);
+    }
+
+    function closeOnOutsideClick(event) {
+        if (event.target === event.currentTarget) {
+            toggleOrders();
+        }
+    }
+</script>
+<!-- Scripts at end of body -->
+<script>
+    const menu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('mobile-menu-overlay');
+    const openBtn = document.getElementById('mobile-menu-open');
+    const closeBtn = document.getElementById('mobile-menu-close');
+
+    function openMenu() {
+        menu.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+    }
+
+    function closeMenu() {
+        menu.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+
+    openBtn.addEventListener('click', openMenu);
+    closeBtn.addEventListener('click', closeMenu);
+    overlay.addEventListener('click', closeMenu);
+</script>
+</body>
+
+</html>
+
+
+<!-- <script src="location.js"></script> -->
+<script src="database.js"></script>
+<script src="api.js"></script>
+<script src="utility.js"></script>
+<script src="cart.js"></script>
+<script src="authentication.js"></script>
+<script src="lang.js"></script>
+<script src="location.js"></script>
+<script src="click.js"></script>
+<script src="mic.js"></script>
+
+   
+
+
+
+
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9662349ef54fd68d',t:'MTc1MzY4Mjk0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>
